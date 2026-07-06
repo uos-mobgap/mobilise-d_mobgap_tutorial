@@ -1,0 +1,14 @@
+[project]
+name = "mobgap-tutorial"
+version = "0.1.0"
+description = "MobGap tutorial scripts for processing Axivity CWA recordings"
+requires-python = ">=3.9,<3.15"
+dependencies = [
+    "mobgap[cwa]",
+    "matplotlib>=3.7.2,<4",
+    "pandas>=2.2.0",
+    "ipykernel>=6.25.1,<7",
+]
+
+[tool.uv.sources]
+mobgap = { path = "../mobgap", editable = true }
