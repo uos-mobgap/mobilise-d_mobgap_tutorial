@@ -165,8 +165,8 @@ if not os.path.exists(target_dir):                          # check if the folde
 # %%
 from scipy.io import savemat
 
-savemat(target_dir + "\\infoForAlgo.mat", infoForAlgo, do_compression=False)
-savemat(target_dir + "\\data.mat", data, do_compression=False)
+savemat(os.path.join(target_dir, "infoForAlgo.mat"), infoForAlgo, do_compression=False)
+savemat(os.path.join(target_dir, "data.mat"), data, do_compression=False)
 
 # %%
 from mobgap.data import GenericMobilisedDataset

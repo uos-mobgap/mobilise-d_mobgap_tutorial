@@ -9,6 +9,7 @@
 # - Sensor columns use MobGap names (`acc_x`, `gyr_x`, ...) rather than `accel_x`, `gyro_x`, ...
 # - Acceleration is in m/s^2 (MobGap convention), not in g
 # - No intermediate `.mat` files are written, the CWA file goes straight into a dataset
+# - **Resampling:** this path uses MobGap's `Resample` (`scipy.signal.resample`), not the linear `numpy.interp` re-gridding in `get_cwa_data(resample=True)`. Pipeline outputs may therefore differ from `MobGap_Tutorial.ipynb` even on the same `.cwa` file. See `reports/cwa-to-mobgap-paths.md` §5. To skip MobGap's resampling step entirely, pass `resample_hz=None`.
 
 # %%
 import os
@@ -36,6 +37,10 @@ print(cwa_files)
 # 
 # `load_cwa_as_dataset` wraps the Open Movement reader, converts units/column names to MobGap
 # conventions, and returns a dataset that can be passed into MobGap pipeline.
+# 
+# We pass `resample_hz=100` below to match the nominal AX3 rate. That applies MobGap's Fourier
+# resampler — it does **not** replicate Johnny's tutorial, which always re-grids with linear
+# interpolation via `get_cwa_data(resample=True)`.
 
 # %%
 from datetime import datetime, timezone
@@ -61,12 +66,14 @@ else:
         "subject_id": 1,
     }
 
+    # resample_hz=100: MobGap Fourier resampling (scipy), not get_cwa_data linear interp.
+    # use resample_hz=None to keep the Open Movement decoder output unchanged.
     dataset = load_cwa_as_dataset(
         cwa_files[0],
         participant_metadata,
         recording_metadata={"measurement_condition": "laboratory"},
         include_time_index=True,  # utc unix seconds for plotting
-        resample_hz=100,  # match Johnny's resample=True in get_cwa_data
+        resample_hz=100,
     )
 
     datapoint = dataset[0]
@@ -83,8 +90,8 @@ display(samples.head(10))
 # - gyr_x
 # - gyr_y
 # - gyr_z
-#
-# As seen in the table above. You can even plot the time index if you like but it'll just be a straight line.
+# 
+# As seen in the table above. The index is UTC Unix time in seconds (not a pandas `DatetimeIndex`, which can segfault on some HPC module stacks). For readable time axes, convert with `datetime.fromtimestamp` when plotting (see below).
 
 # %%
 samples["acc_x"].plot(figsize=(20, 5))
@@ -119,7 +126,8 @@ print(start_date_time)
 # %% [markdown]
 # Next we'll check our sample rate.
 # 
-# These sensors record 100 samples per second - 100 Hz.
+# These sensors record 100 samples per second — 100 Hz. Printing `100` here does not mean the
+# waveform was re-gridded the same way as in Johnny's tutorial; see the resampling note above.
 
 # %%
 fs = datapoint.sampling_rate_hz
@@ -150,3 +158,7 @@ plt.hist(pipeline.per_wb_parameters_["cadence_spm"], bins=10)
 plt.show()
 
 # %%
+
+
+
+
