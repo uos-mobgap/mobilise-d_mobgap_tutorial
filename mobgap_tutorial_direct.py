@@ -1,9 +1,9 @@
 # %% [markdown]
 # # MobGap Tutorial Experimental (CWA -> pipeline via mobgap.data.load_cwa_as_dataset)
-#
+# 
 # This recreates `mobilise-d_mobgap_tutorial/mobgap_tutorial_johnny.py`, but loads `.cwa`
 # files directly with `mobgap.data.load_cwa_as_dataset` instead of converting to MATLAB first.
-#
+# 
 # The plotting and pipeline sections follow the John Mitchell's tutorial as closely as possible.
 # Differences:
 # - Sensor columns use MobGap names (`acc_x`, `gyr_x`, ...) rather than `accel_x`, `gyro_x`, ...
@@ -33,7 +33,7 @@ print(cwa_files)
 
 # %% [markdown]
 # Now let's load the CWA file with MobGap's built-in loader.
-
+# 
 # `load_cwa_as_dataset` wraps the Open Movement reader, converts units/column names to MobGap
 # conventions, and returns a dataset that can be passed into MobGap pipeline.
 
@@ -64,7 +64,8 @@ else:
     dataset = load_cwa_as_dataset(
         cwa_files[0],
         participant_metadata,
-        include_time_index=True,  # utc timestamps for plotting
+        recording_metadata={"measurement_condition": "laboratory"},
+        include_time_index=True,  # utc unix seconds for plotting
         resample_hz=100,  # match Johnny's resample=True in get_cwa_data
     )
 
@@ -93,14 +94,16 @@ samples["acc_x"].plot(figsize=(20, 5))
 
 # %%
 import matplotlib.pyplot as plt
+from datetime import datetime, timezone
 
 start_id = 0
 end_id = 1000
 
 samples_to_plot = samples.iloc[start_id:end_id]
+time_axis = [datetime.fromtimestamp(t, tz=timezone.utc) for t in samples_to_plot.index]
 
 plt.figure(figsize=(20, 5))
-plt.plot(samples_to_plot.index, samples_to_plot["acc_x"])
+plt.plot(time_axis, samples_to_plot["acc_x"])
 plt.show()
 
 # %% [markdown]
@@ -115,7 +118,7 @@ print(start_date_time)
 
 # %% [markdown]
 # Next we'll check our sample rate.
-#
+# 
 # These sensors record 100 samples per second - 100 Hz.
 
 # %%
