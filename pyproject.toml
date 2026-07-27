@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mobilise-d-mobgap-tutorial"
+version = "0.1.0"
+description = "Mobilise-D MobGap tutorial notebooks, including the omcwa walkthrough"
+requires-python = ">=3.11,<3.15"
+dependencies = [
+    "omcwa @ git+https://github.com/uos-mobgap/omcwa.git",
+    "mobgap @ git+https://github.com/uos-mobgap/mobgap-plus.git@artem/cwa-loader",
+    "pandas>=2.2",
+    "matplotlib>=3.7",
+    "scipy>=1.11",
+    "ipykernel>=6.25,<7",
+    "jupyter>=1.1",
+]
+
+[tool.hatch.build.targets.wheel]
+only-include = ["pyproject.toml"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+omcwa = { git = "https://github.com/uos-mobgap/omcwa" }
+mobgap = { git = "https://github.com/uos-mobgap/mobgap-plus.git", branch = "artem/cwa-loader" }
